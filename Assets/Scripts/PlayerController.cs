@@ -8,6 +8,8 @@ public class PlayerController : MonoBehaviour
     public GameObject projectile;
     public TextMeshProUGUI LifeText;
 
+    private Rigidbody playerRB;
+    private GameManager gameManagerScript;
     private float horizontalInput;
     private float verticalInput;
     private float mouseMoveX;
@@ -19,6 +21,10 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        playerRB = GetComponent<Rigidbody>();
+
+        gameManagerScript = GameObject.Find("GameManager").GetComponent<GameManager>();
+
         LifeText.text = "Lifes: " + playerLife;
 
         InvokeRepeating("AllowToShoot", 0.0f, 0.5f);
@@ -27,20 +33,23 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Get Input from Player
-        horizontalInput = Input.GetAxis("Horizontal");
-        verticalInput = Input.GetAxis("Vertical");
-        mouseMoveX = Input.GetAxis("Mouse X");
-
-        // Move the Player
-        transform.Translate(Vector3.forward * speed * verticalInput * Time.deltaTime);
-        transform.Translate(Vector3.right * speed * horizontalInput * Time.deltaTime);
-        transform.Rotate(Vector3.up, turnSpeed * mouseMoveX * Time.deltaTime);
-
-        if (Input.GetKeyDown(KeyCode.Space) && isAllowedToShoot)
+        if (gameManagerScript.gameIsActive)
         {
-            FireProjectile();
-            isAllowedToShoot = !isAllowedToShoot;
+            // Get Input from Player
+            horizontalInput = Input.GetAxis("Horizontal");
+            verticalInput = Input.GetAxis("Vertical");
+            mouseMoveX = Input.GetAxis("Mouse X");
+
+            // Move the Player
+            transform.Translate(Vector3.forward * speed * verticalInput * Time.deltaTime);
+            transform.Translate(Vector3.right * speed * horizontalInput * Time.deltaTime);
+            transform.Rotate(Vector3.up, turnSpeed * mouseMoveX * Time.deltaTime);
+
+            if (Input.GetKeyDown(KeyCode.Space) && isAllowedToShoot)
+            {
+                FireProjectile();
+                isAllowedToShoot = !isAllowedToShoot;
+            }
         }
     }    
 
@@ -59,8 +68,7 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.tag == "EnemyProjectile")
         {
-            playerLife -= 1;
-            LifeText.text = "Lifes: " + playerLife;
+            MinusPlayerLife();
             Destroy(other.gameObject);
         }
     }
@@ -70,9 +78,27 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Enemy")
         {
-            playerLife -= 1;
-            LifeText.text = "Lifes: " + playerLife;
+            MinusPlayerLife();
             Destroy(collision.gameObject);
+        }
+
+        // Stops the Player from Bugging around when the wall was hit
+        if (collision.gameObject.tag == "Walls")
+        {
+            playerRB.velocity = Vector3.zero;
+        }
+    }
+
+    // Abstraction
+    private void MinusPlayerLife()
+    {
+        // Reduce PlayerLife when hit by an Enemy
+        playerLife -= 1;
+        LifeText.text = "Lifes: " + playerLife;
+        // End the Game when PlayerLife Equal 0
+        if (playerLife == 0)
+        {
+            gameManagerScript.GameOver();
         }
     }
 }

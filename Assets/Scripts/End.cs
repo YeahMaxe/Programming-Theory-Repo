@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Walls : MonoBehaviour
+public class End : MonoBehaviour
 {
+    private GameManager gameManagerScript;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        gameManagerScript = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
@@ -18,7 +20,9 @@ public class Walls : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Only Projectiles are Triggers -> all Projectile are destroyed when colliding with the wall
-        Destroy(other.gameObject);
+        if (other.gameObject.tag == "Projectile")
+        {
+            gameManagerScript.GameWon();
+        }
     }
 }

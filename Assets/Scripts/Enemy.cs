@@ -4,20 +4,27 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    private float enemyHitPoints = 2;
+    public float enemyHitPoints = 2;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+       
     }
 
+    // Polymorphism
+    public virtual void AttackPlayer()
+    {
+       
+    }
+
+    // Inheritance
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Projectile")
